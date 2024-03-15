@@ -1,9 +1,7 @@
-#include <Stepper.h>
 const int dirPin = 9;
 const int stepPin = 10;
 const int enPin = 11;
 const int sensorDigitalPin = 8 ;
-const int stepsPerRevolution = 200;
 void setup() {
     pinMode(stepPin,OUTPUT);//output fordi de skal styre motoren
     pinMode(dirPin,OUTPUT);// output fordi de skal styre motoren
@@ -11,7 +9,7 @@ void setup() {
     pinMode(sensorDigitalPin,INPUT);// input fordi den skal lese verdier fra nærhetssensor
     digitalWrite(enPin, LOW); // motor er aktivt
     Serial.begin(9600);   
-    myStepper.setSpeed(60);
+    ;
 }
 
 void loop() {
