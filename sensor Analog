@@ -1,0 +1,25 @@
+
+const int lm35Pin = A0; // Angi analog pinne som sensoren er koblet til
+
+void setup() {
+  Serial.begin(9600); // Start seriell kommunikasjon
+}
+
+void loop() {
+  // Les spenningsverdien fra sensoren
+  int sensorValue = analogRead(lm35Pin);
+
+  // Konverter spenningsverdien til temperatur (mV per °C: 10mV per 1°C)
+  float milliVolts = (sensorValue / 1023.0) * 5000; // 5000 mV = 5V
+  float temperatureC = milliVolts / 10.0;
+
+  // Skriv ut temperaturen til seriellmonitor
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.println(" °C");
+
+  delay(500); // Vent litt tid før du leser temperaturen igjen
+}
+
+
+
