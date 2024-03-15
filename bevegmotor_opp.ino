@@ -18,7 +18,7 @@ void loop() {
     digitalWrite(enPin, HIGH); // stop motoren
     Serial.println("Pumpe stopper. water level reached");
   } else {
-  }// fortsatt å kjøre pumpen hvis vannivået ikke er nådd
+  // fortsatt å kjøre pumpen hvis vannivået ikke er nådd
   // kode for å kjøre motoren
 
 
@@ -30,7 +30,7 @@ void loop() {
       delayMicroseconds(500);
     }
 
-    
+  }
 
      /*for(int x = 1; x<1000; x++){
       digitalWrite(dirPin,LOW);
