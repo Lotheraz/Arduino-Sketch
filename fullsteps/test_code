@@ -2,19 +2,19 @@
 //17 march 24 for testing pump, GUI communication and step2 function
 
 // Define pins for electromagnets controlling the valves
-const int electromagnetPin1 = 2;  // Pin for electromagnet controlling valve 1
-const int electromagnetPin2 = 3;  // Pin for electromagnet controlling valve 2
-const int electromagnetPin3 = 4;  // Pin for electromagnet controlling valve 3
-const int electromagnetPin4 = 5;  // Pin for electromagnet controlling valve 4
-const int electromagnetPin5 = 6;  // Pin for electromagnet controlling valve 5
-const int electromagnetPin6 = 7;  // Pin for electromagnet controlling valve 6
-const int electromagnetPin7 = 8;  // Pin for electromagnet controlling valve 7
-const int electromagnetPin8 = 9;  // Pin for electromagnet controlling valve 8
-const int electromagnetPin9 = 10; // Pin for electromagnet controlling valve 9
-const int dirPin = 9;
-const int stepPin = 10;
-const int enPin = 11;
-const int sensorDigitalPin = 8;
+const int electromagnetPin1 = 22;  // Pin for electromagnet controlling valve 1
+const int electromagnetPin2 = 23;  // Pin for electromagnet controlling valve 2
+const int electromagnetPin3 = 24;  // Pin for electromagnet controlling valve 3
+const int electromagnetPin4 = 25;  // Pin for electromagnet controlling valve 4
+const int electromagnetPin5 = 26;  // Pin for electromagnet controlling valve 5
+const int electromagnetPin6 = 27;  // Pin for electromagnet controlling valve 6
+const int electromagnetPin7 = 28;  // Pin for electromagnet controlling valve 7
+const int electromagnetPin8 = 29;  // Pin for electromagnet controlling valve 8
+const int electromagnetPin9 = 30; // Pin for electromagnet controlling valve 9
+const int sensorDigitalPin = 8; // pijn for senson of pump
+const int dirPin = 9;          // pin for direction of pump
+const int stepPin = 10;        //pin bevegelse av pump
+const int enPin = 11;          // pin for high- eller low stepper motor
 
 void setup() {
   // Set electromagnet pins as output pins
