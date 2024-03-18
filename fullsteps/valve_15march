@@ -1,0 +1,345 @@
+//15 march 24 after adding pump code(my code) and both single select and all steps selection function
+
+// Define pins for electromagnets controlling the valves
+const int electromagnetPin1 = 2;  // Pin for electromagnet controlling valve 1
+const int electromagnetPin2 = 3;  // Pin for electromagnet controlling valve 2
+const int electromagnetPin3 = 4;  // Pin for electromagnet controlling valve 3
+const int electromagnetPin4 = 5;  // Pin for electromagnet controlling valve 4
+const int electromagnetPin5 = 6;  // Pin for electromagnet controlling valve 5
+const int electromagnetPin6 = 7;  // Pin for electromagnet controlling valve 6
+const int electromagnetPin7 = 8;  // Pin for electromagnet controlling valve 7
+const int electromagnetPin8 = 9;  // Pin for electromagnet controlling valve 8
+const int electromagnetPin9 = 10; // Pin for electromagnet controlling valve 9
+const int pumpPin1 = 11; // Digital Pin for pump 1
+const int pumpPin2 = 12; // Pin for pump 2
+
+void setup() {
+  // Set electromagnet pins as output pins
+  pinMode(electromagnetPin1, OUTPUT);
+  pinMode(electromagnetPin2, OUTPUT);
+  pinMode(electromagnetPin3, OUTPUT);
+  pinMode(electromagnetPin4, OUTPUT);
+  pinMode(electromagnetPin5, OUTPUT);
+  pinMode(electromagnetPin6, OUTPUT);
+  pinMode(electromagnetPin7, OUTPUT);
+  pinMode(electromagnetPin8, OUTPUT);
+  pinMode(electromagnetPin9, OUTPUT);
+  
+  // Set pump pins as output pins
+  pinMode(pumpPin1, OUTPUT);
+  pinMode(pumpPin2, OUTPUT);
+  
+    // Step 1: 
+  closeAllValves(); //close all valves
+  
+  turnOffPumps();  // Initialize both pumps to be off
+}
+
+void loop() {
+  // Read input from GUI dropdown list
+  int selectedStep = readSelectedStepFromGUI(); //  replace this with Ove's GUI input reading code
+
+  // Check the selected step and execute the corresponding function
+  switch(selectedStep) {
+	case 1:
+	  step2();
+	  step3();
+	  step4();
+	  step5();
+	  step6();
+	  step7();
+	  step8();
+	  step9();
+	  step10();
+	  step11();
+	  step12();
+	  step13();
+	  step14();
+	  step15();
+	  step16();
+	  step17();
+	  step18();
+	  step19();
+	  step20();
+	  step21();
+	  step22();
+	  break;		
+    case 2:
+      step2();
+      break;
+    case 3:
+      step3();
+      break;
+	case 4:
+      step4();
+      break;
+    case 5:
+      step5();
+      break;
+    case 6:
+      step6();
+      break;
+    case 7:
+      step7();
+      break;	  
+    case 8:
+      step8();
+      break;
+    case 9:
+      step9();
+      break;
+    case 10:
+      step10();
+      break;
+    case 11:
+      step11();
+      break;
+    case 12:
+      step12();
+      break;
+    case 13:
+      step13();
+      break;
+    case 14:
+      step14();
+      break;
+    case 15:
+      step15();
+      break;
+    case 16:
+      step16();
+      break;
+    case 17:
+      step17();
+      break;
+    case 18:
+      step18();
+      break;
+    case 19:
+      step19();
+      break;
+    case 20:
+      step20();
+      break;
+    case 21:
+      step21();
+      break;
+    case 22:
+      step22();
+      break;	  
+  }
+}
+
+// Define functions for each step
+
+void step2() {
+  closeAllValves(); // Close all valves
+  openValve(4); // Open valve 4
+  turnOffPump1();  //pump 1 is off *
+  turnOnPump2Suck(); //pump2 on-suck *
+  delay(60000); // Wait for 60 seconds
+  closeValve(4); // Close valve 4
+  turnOffPumps();  //*new
+}
+
+void step3() {
+  closeAllValves(); // Close all valves
+  delay(20000); // Wait for 20 seconds
+  //In this step 3 also turn off both pumps
+}
+void step4 () {
+  closeAllValves(); // Close all valves
+  delay(10000); // Wait for 10 seconds
+  // step 4 :pump1 is ON push pump2 is off
+}
+void step5 () {
+  closeAllValves(); // Close all valves
+  openValve(3); //open valve 3
+  delay(10000); // Wait for 10 seconds
+  closeValve(3); // close valve 3
+  //in this step pump1 is off and pump2 is on suck
+}
+void step6 () {
+  // Step 6: Turn close all valves for 10 seconds
+  closeAllValves(); // Close all valves
+  delay(10000); // Wait for 10 seconds
+  // step 6 :turn off both pumps
+}
+void step7 () {
+  closeAllValves(); // Close all valves
+  openValves(5); // Open valves 5
+  openValves(6); //Open valve 6
+  delay(5000);   // Wait for 5 seconds
+  closeAllValves(); // Close all valves
+  // Step 7 :pump 1 is on-suck and turn off pump2
+}
+void step8 () {
+  closeAllValves(); // Close all valves
+  openValve(2); //open valve 2
+  delay(10000); // Wait for 10 seconds
+  closeValve(2); // close valve 2
+  //in this step8 : pump 1 is off and pump2 on-suck
+}
+void step9 () {
+  closeAllValves(); // Close all valves
+  delay(10000); // Wait for 10 seconds
+  // Step 9 :turn off both pumps
+}
+void step10 () {
+  closeAllValves(); // Close all valves
+  openValves(5); // Open valves 5
+  openValves(6); //Open valve 6
+  delay(5000);   // Wait for 5 seconds
+  closeAllValves(); // Close all valves
+  // Step 10 :pump 1 is on-suck and turn off pump2
+}
+void step11 () {
+  closeAllValves(); // Close all valves
+  openValve(1);  //open valve 1
+  delay(5000);   // Wait for 5 seconds
+  closeAllValves(); // Close all valves
+  //in this step11 : pump 1 is off and pump2 on-suck
+}
+void step12 () {
+  // Step 12: Turn close all valves for 10 seconds
+  closeAllValves(); // Close all valves
+  delay(10000); // Wait for 10 seconds
+  // step 12 :turn off both pumps
+}
+void step13 () {
+  closeAllValves(); // Close all valves
+  openValves(5); // Open valves 5
+  openValves(6); //Open valve 6
+  delay(2000);   // Wait for 2 seconds
+  closeAllValves(); // Close all valves
+  // step 13 :pump 1 is on-suck and turn off pump2
+}
+void step14 () {
+  closeAllValves(); // Close all valves
+  openValve(1);  //open valve 1
+  delay(5000);   // Wait for 5 seconds
+  closeAllValves(); // Close all valves
+  //in this step14 : pump 1 is off and pump2 on-suck
+}
+void step15 () {
+  closeAllValves(); // Close all valves
+  openValve(8);  //open valve 8
+  delay(5000);   // Wait for 5 seconds
+  closeAllValves(); // Close all valves
+  //in this step15 : pump 1 is off and pump2 on-suck
+}
+void step16 () {
+  closeAllValves(); // Close all valves
+  openValves(5); // Open valves 5
+  openValves(10); //Open valve 10 also check with teacher is this pump we dont have this 
+  delay(15000);   // Wait for 15 seconds
+  closeAllValves(); // Close all valves
+  // step 16 :pump 1 is on-suck and turn off pump2
+}
+void step17 () {
+  closeAllValves(); //Close all valves
+  delay(5000); // Wait for 5 seconds
+  //In this step 17: turn off both pumps
+}
+void step18 () {
+  closeAllValves(); // Close all valves
+  openValve(9);  //open valve 9
+  delay(1000);   // Wait for 1 seconds
+  closeAllValves(); // Close all valves
+  // step 18: pump 1 is on-suck and turn off pump2
+}
+void step19 () {
+  closeAllValves(); //Close all valves
+  delay(120000); // Wait for 120 seconds
+  //In this step 19: turn off both pumps
+}
+void step20 () {
+  closeAllValves(); // Close all valves
+  openValve(9);  //open valve 9
+  delay(000);   // Wait for  seconds
+  closeAllValves(); // Close all valves
+  // step 20: pump 1 is on-suck and turn off pump2
+}
+void step21 () {
+  closeAllValves(); // Close all valves
+  // Step 21: turn off both pumps
+}
+void step22 () {
+  closeAllValves(); // Close all valves
+  // Step 22: turn off both pumps
+}
+
+
+// Function to close all valves
+void closeAllValves() {
+  digitalWrite(electromagnetPin1, LOW);
+  digitalWrite(electromagnetPin2, LOW);
+  digitalWrite(electromagnetPin3, LOW);
+  digitalWrite(electromagnetPin4, LOW);
+  digitalWrite(electromagnetPin5, LOW);
+  digitalWrite(electromagnetPin6, LOW);
+  digitalWrite(electromagnetPin7, LOW);
+  digitalWrite(electromagnetPin8, LOW);
+  digitalWrite(electromagnetPin9, LOW);
+}
+
+// Function to open a specific valve
+void openValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), HIGH); // Turn on electromagnet to open the valve
+}
+
+// Function to close a specific valve
+void closeValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), LOW); // Turn off electromagnet to close the valve
+}
+// Function to turn on pump 1
+void turnOnPump1() {
+  digitalWrite(pumpPin1, HIGH);
+}
+
+// Function to turn off pump 1
+void turnOffPump1() {
+  digitalWrite(pumpPin1, LOW);
+}
+
+// Function to turn on pump 2
+void turnOnPump2() {
+  digitalWrite(pumpPin2, HIGH);
+}
+
+// Function to turn off pump 2
+void turnOffPump2() {
+  digitalWrite(pumpPin2, LOW);
+}
+
+// Function to turn off both pumps
+void turnOffPumps() {
+  digitalWrite(pumpPin1, LOW);
+  digitalWrite(pumpPin2, LOW);
+}
+
+// Function to get the pin number of a specific electromagnet based on valve number
+int getElectromagnetPin(int valveNumber) {
+  switch(valveNumber) {
+    case 1:
+      return electromagnetPin1;
+    case 2:
+      return electromagnetPin2;
+    case 3:
+      return electromagnetPin3;
+    case 4:
+      return electromagnetPin4;
+    case 5:
+      return electromagnetPin5;
+    case 6:
+      return electromagnetPin6;
+    case 7:
+      return electromagnetPin7;
+    case 8:
+      return electromagnetPin8;
+    case 9:
+      return electromagnetPin9;
+    default:
+      return -1; // Invalid valve number
+  }
+}
