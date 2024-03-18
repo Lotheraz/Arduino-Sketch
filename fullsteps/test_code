@@ -1,4 +1,5 @@
 //test code with only step2, pump code from Aya and GUI
+//17 march 24 for testing pump, GUI communication and step2 function
 
 // Define pins for electromagnets controlling the valves
 const int electromagnetPin1 = 2;  // Pin for electromagnet controlling valve 1
