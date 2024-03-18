@@ -1,0 +1,134 @@
+// Define pins for electromagnets controlling the valves
+const int electromagnetPin1 = 2;  // Pin for electromagnet controlling valve 1
+const int electromagnetPin2 = 3;  // Pin for electromagnet controlling valve 2
+const int electromagnetPin3 = 4;  // Pin for electromagnet controlling valve 3
+const int electromagnetPin4 = 5;  // Pin for electromagnet controlling valve 4
+const int electromagnetPin5 = 6;  // Pin for electromagnet controlling valve 5
+const int electromagnetPin6 = 7;  // Pin for electromagnet controlling valve 6
+const int electromagnetPin7 = 8;  // Pin for electromagnet controlling valve 7
+const int electromagnetPin8 = 9;  // Pin for electromagnet controlling valve 8
+const int electromagnetPin9 = 10; // Pin for electromagnet controlling valve 9
+const int dirPin = 9;
+const int stepPin = 10;
+const int enPin = 11;
+const int sensorDigitalPin = 8;
+
+void setup() {
+  // Set electromagnet pins as output pins
+  pinMode(electromagnetPin1, OUTPUT);
+  pinMode(electromagnetPin2, OUTPUT);
+  pinMode(electromagnetPin3, OUTPUT);
+  pinMode(electromagnetPin4, OUTPUT);
+  pinMode(electromagnetPin5, OUTPUT);
+  pinMode(electromagnetPin6, OUTPUT);
+  pinMode(electromagnetPin7, OUTPUT);
+  pinMode(electromagnetPin8, OUTPUT);
+  pinMode(electromagnetPin9, OUTPUT);
+  Serial.begin(9600); // Initialize serial communication
+  
+  pinMode(stepPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  pinMode(enPin, OUTPUT);
+  pinMode(sensorDigitalPin, INPUT);
+  digitalWrite(enPin, LOW); // Enable the motor
+  
+  // Set pump pins as output pins
+
+  
+  // Step 1: 
+  closeAllValves(); //close all valves
+  
+  //turnOffPumps();  // Initialize both pumps to be off
+}
+
+void loop() {
+  // Read input from GUI dropdown list
+  //int selectedStep = readSelectedStepFromGUI(); //  replace this with Ove's GUI input reading code
+
+  if (Serial.available() > 0) { // Check if data is available to read
+    int selectedStep = Serial.parseInt(); // Read the integer value from Serial
+    // Execute the corresponding step function
+    executeStep(selectedStep);
+  }
+}
+
+  // Check the selected step and execute the corresponding function
+void executeStep(int stepNumber) {
+  switch (stepNumber) {
+	
+	case 2:
+      step2();
+      break;
+  }
+}
+
+// Define functions for each step
+
+void step2() {
+  closeAllValves(); // Close all valves
+  openValve(4); // Open valve 4
+  turnOffPump1();  //pump 1 is off *
+  turnOnPump2Suck(); //pump2 on-suck *
+  delay(60000); // Wait for 60 seconds
+  closeValve(4); // Close valve 4
+  turnOffPumps();  //*new
+}
+
+
+
+
+// Function to close all valves
+void closeAllValves() {
+  digitalWrite(electromagnetPin1, LOW);
+  digitalWrite(electromagnetPin2, LOW);
+  digitalWrite(electromagnetPin3, LOW);
+  digitalWrite(electromagnetPin4, LOW);
+  digitalWrite(electromagnetPin5, LOW);
+  digitalWrite(electromagnetPin6, LOW);
+  digitalWrite(electromagnetPin7, LOW);
+  digitalWrite(electromagnetPin8, LOW);
+  digitalWrite(electromagnetPin9, LOW);
+}
+
+// Function to open a specific valve
+void openValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), HIGH); // Turn on electromagnet to open the valve
+}
+
+// Function to close a specific valve
+void closeValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), LOW); // Turn off electromagnet to close the valve
+}
+
+
+// Function to turn off both pumps
+void turnOffPumps() {
+  digitalWrite(pumpPin1, LOW);
+  digitalWrite(pumpPin2, LOW);
+}
+
+// Function to get the pin number of a specific electromagnet based on valve number
+int getElectromagnetPin(int valveNumber) {
+  switch(valveNumber) {
+    case 1:
+      return electromagnetPin1;
+    case 2:
+      return electromagnetPin2;
+    case 3:
+      return electromagnetPin3;
+    case 4:
+      return electromagnetPin4;
+    case 5:
+      return electromagnetPin5;
+    case 6:
+      return electromagnetPin6;
+    case 7:
+      return electromagnetPin7;
+    case 8:
+      return electromagnetPin8;
+    case 9:
+      return electromagnetPin9;
+    default:
+      return -1; // Invalid valve number
+  }
+}
