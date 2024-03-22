@@ -81,7 +81,7 @@ void loop() {
   closeAllValves(); // Close all valves
   openValve(2); //open valve 2
   delay(10000); // Wait for 10 seconds
-  closeValve(1); // close valve 1
+  closeValve(2); // close valve 2
 
   // Step 9:
   closeAllValves(); // Close all valves
