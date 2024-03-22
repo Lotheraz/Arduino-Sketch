@@ -1,0 +1,114 @@
+// Assign pin numbers for the motor driver and sensor
+const int dirPin = 9; 
+// Direction pin for the stepper motor driver
+const int stepPin = 10; 
+// Step pin for the stepper motor driver
+const int enPin = 11; 
+// Enable pin for the stepper motor driver
+const int sensorDigitalPin = 8; 
+// Digital pin connected to the sensor
+
+// The setup function runs once when the Arduino is powered on or reset
+void setup() {
+    pinMode(stepPin, OUTPUT);
+    // Set the step pin as an output
+    pinMode(dirPin, OUTPUT); 
+    // Set the direction pin as an output
+    pinMode(enPin, OUTPUT); 
+    // Set the enable pin as an output
+    pinMode(sensorDigitalPin, INPUT); 
+    // Set the sensor pin as an input
+    digitalWrite(enPin, LOW); 
+    // Enable the motor by setting the enable pin LOW
+    Serial.begin(9600); 
+    // Start serial communication at 9600 baud rate
+}
+
+// The loop function runs continuously after the setup function completes
+void loop() {
+    if (Serial.available() > 0) {
+        // Check if serial data is available to read
+        String receivedString = Serial.readStringUntil('\n'); 
+        // Read the incoming string until a newline character
+
+        if (receivedString == "15" || receivedString == "16") {
+            // Check if the received string is "15" for moving up or "16" for moving down
+            bool directionUp = (receivedString == "15"); 
+            // Determine the direction: true for up, false for down
+            digitalWrite(dirPin, directionUp ? HIGH : LOW); 
+            // Set the direction of the motor
+            digitalWrite(stepPin, HIGH); 
+            // Trigger one step
+            delayMicroseconds(1000); 
+            // Delay briefly to regulate speed
+            digitalWrite(stepPin, LOW); 
+            // Reset the step pin to low
+            delayMicroseconds(1000); 
+            // Delay again to complete the
+
+step cycle
+}
+else if (receivedString == "11") {
+// If the command "11" is received
+moveMotorUpUntilSensorTriggered();
+// Call the function to move the motor up until the sensor is triggered
+moveMotorDownAfterTrigger();
+// Then call the function to move the motor down after the sensor is triggered
+}
+else if (receivedString == "stop") {
+// If the command "stop" is received
+// No action is required for stopping in this simple example
+// The motor stops when no pulses are sent to the 'stepPin'
+}
+}
+}
+
+void moveMotorUpUntilSensorTriggered() {
+// Define a function to move the motor upward until the sensor is triggered
+digitalWrite(dirPin, HIGH);
+// Set the motor direction to up
+while(digitalRead(sensorDigitalPin) == LOW) {
+// Continue looping until the sensor pin reads HIGH
+digitalWrite(stepPin, HIGH);
+// Make one step
+Serial.println("Calibration in progress");
+// Send a message to the serial monitor
+delayMicroseconds(1000);
+// Delay to regulate speed
+digitalWrite(stepPin, LOW);
+// Reset the step pin to low
+delayMicroseconds(1000);
+// Delay to complete the step cycle
+}
+Serial.println("Limit reached");
+// Send a message when the sensor limit is reached
+}
+
+void moveMotorDownAfterTrigger() {
+// Define a function to move the motor downward after the sensor trigger
+Serial.println("Calibration in progress");
+// Send a calibration message
+moveMotor(false, 16000);
+// Call 'moveMotor' with direction down and for 16000 steps
+}
+
+void moveMotor(bool directionUp, int steps) {
+// Define a function for moving the motor in a specified direction and number of steps
+digitalWrite(enPin, LOW);
+// Ensure the motor is enabled
+digitalWrite(dirPin, directionUp ? HIGH : LOW);
+// Set the motor direction based on 'directionUp' parameter
+for (int x = 0; x < steps; x++) {
+// Loop through the desired number of steps
+digitalWrite(stepPin, HIGH);
+// Make one step
+delayMicroseconds(1000);
+// Delay to regulate speed
+digitalWrite(stepPin, LOW);
+// Reset the step pin to low
+delayMicroseconds(1000);
+// Delay to complete the step cycle
+}
+// Optionally, you could disable the motor after moving to conserve power or reduce heat
+// digitalWrite(enPin, HIGH); // Disable the motor
+}
