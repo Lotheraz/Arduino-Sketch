@@ -1,0 +1,216 @@
+//22 march 24 for testing only valve function
+
+
+// Define pins for electromagnets controlling the valves
+const int electromagnetPin1 = 22;  // Pin for electromagnet controlling valve 1
+const int electromagnetPin2 = 23;  // Pin for electromagnet controlling valve 2
+const int electromagnetPin3 = 24;  // Pin for electromagnet controlling valve 3
+const int electromagnetPin4 = 25;  // Pin for electromagnet controlling valve 4
+const int electromagnetPin5 = 26;  // Pin for electromagnet controlling valve 5
+const int electromagnetPin6 = 27;  // Pin for electromagnet controlling valve 6
+const int electromagnetPin7 = 28;  // Pin for electromagnet controlling valve 7
+const int electromagnetPin8 = 29;  // Pin for electromagnet controlling valve 8
+const int electromagnetPin9 = 30; // Pin for electromagnet controlling valve 9
+const int sensorDigitalPin = 31; // pijn for senson of pump
+
+
+void setup() {
+  // Set electromagnet pins as output pins
+  pinMode(electromagnetPin1, OUTPUT);
+  pinMode(electromagnetPin2, OUTPUT);
+  pinMode(electromagnetPin3, OUTPUT);
+  pinMode(electromagnetPin4, OUTPUT);
+  pinMode(electromagnetPin5, OUTPUT);
+  pinMode(electromagnetPin6, OUTPUT);
+  pinMode(electromagnetPin7, OUTPUT);
+  pinMode(electromagnetPin8, OUTPUT);
+  pinMode(electromagnetPin9, OUTPUT);
+  Serial.begin(9600); // Initialize serial communication
+  
+  // Set pump pins as output pins
+
+  
+  // Step 1: 
+  closeAllValves(); //close all valves
+  
+  
+}
+
+void loop() {
+  // Step 2: Turn off valve 4 for 60 seconds
+  closeAllValves(); // Close all valves
+  openValve(4); // Open valve 4
+  delay(60000); // Wait for 60 seconds
+  closeValve(4); // Close valve 4
+  //in this step2 : pump2 suck 
+
+  // Step 3: Turn on all valves for 20 seconds
+  closeAllValves(); // Close all valves
+  delay(20000); // Wait for 20 seconds
+
+  // Step 4: Turn on all valves for 10 seconds
+  closeAllValves(); // Close all valves
+  openValve(5); //open valve 5
+  openValve(6); //open valve 6
+  delay(10000); // Wait for 10 seconds
+  closeValve(5); // close valve 5
+  closeValve(6); // close valve 6
+  // step 4 :pump1 is off pump2 is ON push
+
+  // Step 5: Turn off valve 3 for 10 seconds while keeping all other valves on
+  closeAllValves(); // Close all valves
+  openValve(1); //open valve 1
+  delay(10000); // Wait for 10 seconds
+  closeValve(1); // close valve 1
+  //in this step pump1 is off and pump2 is on suck
+
+  // Step 6: Turn on all valves for 10 seconds
+  closeAllValves(); //Close all valves
+  delay(120000); // Wait for 120 seconds
+  // step 6 :turn off both pumps
+
+  // Step 7: Turn on all valves for 5 seconds
+  closeAllValves(); // Close all valves
+  openValve(5); //open valve 5
+  openValve(6); //open valve 6
+  delay(5000); // Wait for 5 seconds
+  closeValve(5); // close valve 5
+  closeValve(6); // close valve 6
+  // step 7 :pump 1 is off and turn on push
+
+  // Step 8:   
+  closeAllValves(); // Close all valves
+  openValve(2); //open valve 2
+  delay(10000); // Wait for 10 seconds
+  closeValve(1); // close valve 1
+
+  // Step 9:
+  closeAllValves(); // Close all valves
+  delay(60000); // Wait for 60 seconds
+
+  // Step 10:
+  closeAllValves(); // Close all valves
+  openValve(5); //open valve 5
+  openValve(6); //open valve 6
+  delay(5000); // Wait for 5 seconds
+  closeValve(5); // close valve 5
+  closeValve(6); // close valve 6
+
+  //Step 11: 
+  closeAllValves(); // Close all valves
+  openValve(3); //open valve 3
+  delay(10000); // Wait for 10 seconds
+  closeValve(3); // close valve 3
+
+  //Step 12:
+  closeAllValves(); // Close all valves
+  delay(20000); // Wait for 20 seconds
+
+  //Step 13:
+  closeAllValves(); // Close all valves
+  openValve(5); //open valve 5
+  openValve(6); //open valve 6
+  delay(5000); // Wait for 5 seconds
+  closeValve(5); // close valve 5
+  closeValve(6); // close valve 6
+
+  //Step 14:
+  closeAllValves(); // Close all valves
+  delay(5000); // Wait for 5 seconds
+
+  //Step 15:
+  closeAllValves(); // Close all valves
+  openValve(9); //open valve 9
+  delay(10000); // Wait for 10 seconds
+  closeValve(9); // close valve 9
+
+  //Step 16:
+  closeAllValves(); // Close all valves
+  openValve(5); //open valve 5
+  openValve(9); //open valve 9
+  delay(15000); // Wait for 15 seconds
+  closeValve(5); // close valve 5
+  closeValve(9); // close valve 9
+
+  //Step 17:
+  closeAllValves(); // Close all valves
+  delay(5000); // Wait for 5 seconds
+
+  //Step 18:
+  closeAllValves(); // Close all valves
+  openValve(8); //open valve 8
+  delay(1000); // Wait for 1 seconds
+  closeValve(8); // close valve 8
+
+  //Step 19:
+  closeAllValves(); // Close all valves
+  openValve(8); //open valve 8
+  delay(20000); // Wait for 20 seconds
+  closeValve(8); // close valve 8
+
+  // Step 20:
+  closeAllValves(); // Close all valves
+  delay(100000); // Wait for 100 seconds
+
+}
+
+// This function opens all valves simultaneously by setting all corresponding electromagnet pins to HIGH.
+void openAllValves() {
+  digitalWrite(electromagnetPin1, HIGH);
+  digitalWrite(electromagnetPin2, HIGH);
+  digitalWrite(electromagnetPin3, HIGH);
+  digitalWrite(electromagnetPin4, HIGH);
+  digitalWrite(electromagnetPin5, HIGH);
+  digitalWrite(electromagnetPin6, HIGH);
+  digitalWrite(electromagnetPin7, HIGH);
+  digitalWrite(electromagnetPin8, HIGH);
+  digitalWrite(electromagnetPin9, HIGH);
+}
+// Function to close all valves
+void closeAllValves() {
+  digitalWrite(electromagnetPin1, LOW);
+  digitalWrite(electromagnetPin2, LOW);
+  digitalWrite(electromagnetPin3, LOW);
+  digitalWrite(electromagnetPin4, LOW);
+  digitalWrite(electromagnetPin5, LOW);
+  digitalWrite(electromagnetPin6, LOW);
+  digitalWrite(electromagnetPin7, LOW);
+  digitalWrite(electromagnetPin8, LOW);
+  digitalWrite(electromagnetPin9, LOW);
+}
+
+// Function to open a specific valve
+void openValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), HIGH); // Turn on electromagnet to open the valve
+}
+
+// Function to close a specific valve
+void closeValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), LOW); // Turn off electromagnet to close the valve
+}
+
+// Function to get the pin number of a specific electromagnet based on valve number
+int getElectromagnetPin(int valveNumber) {
+  switch(valveNumber) {
+    case 1:
+      return electromagnetPin1;
+    case 2:
+      return electromagnetPin2;
+    case 3:
+      return electromagnetPin3;
+    case 4:
+      return electromagnetPin4;
+    case 5:
+      return electromagnetPin5;
+    case 6:
+      return electromagnetPin6;
+    case 7:
+      return electromagnetPin7;
+    case 8:
+      return electromagnetPin8;
+    case 9:
+      return electromagnetPin9;
+    default:
+      return -1; // Invalid valve number
+  }
+}
