@@ -11,7 +11,7 @@ const int electromagnetPin6 = 27;  // Pin for electromagnet controlling valve 6
 const int electromagnetPin7 = 28;  // Pin for electromagnet controlling valve 7
 const int electromagnetPin8 = 29;  // Pin for electromagnet controlling valve 8
 const int electromagnetPin9 = 30; // Pin for electromagnet controlling valve 9
-const int sensorDigitalPin = 31; // pijn for senson of pump
+const int sensorDigitalPin = 31; // pin for senson of pump
 
 
 void setup() {
@@ -32,8 +32,7 @@ void setup() {
   
   // Step 1: 
   closeAllValves(); //close all valves
-  
-  
+
 }
 
 void loop() {
@@ -155,17 +154,18 @@ void loop() {
 }
 
 // This function opens all valves simultaneously by setting all corresponding electromagnet pins to HIGH.
-void openAllValves() {
-  digitalWrite(electromagnetPin1, HIGH);
-  digitalWrite(electromagnetPin2, HIGH);
-  digitalWrite(electromagnetPin3, HIGH);
-  digitalWrite(electromagnetPin4, HIGH);
-  digitalWrite(electromagnetPin5, HIGH);
-  digitalWrite(electromagnetPin6, HIGH);
-  digitalWrite(electromagnetPin7, HIGH);
-  digitalWrite(electromagnetPin8, HIGH);
-  digitalWrite(electromagnetPin9, HIGH);
-}
+//void openAllValves() {
+//  digitalWrite(electromagnetPin1, HIGH);
+//  digitalWrite(electromagnetPin2, HIGH);
+//  digitalWrite(electromagnetPin3, HIGH);
+//  digitalWrite(electromagnetPin4, HIGH);
+//  digitalWrite(electromagnetPin5, HIGH);
+//  digitalWrite(electromagnetPin6, HIGH);
+//  digitalWrite(electromagnetPin7, HIGH);
+//  digitalWrite(electromagnetPin8, HIGH);
+//  digitalWrite(electromagnetPin9, HIGH);
+//}
+
 // Function to close all valves
 void closeAllValves() {
   digitalWrite(electromagnetPin1, LOW);
