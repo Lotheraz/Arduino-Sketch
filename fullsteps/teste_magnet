@@ -1,0 +1,16 @@
+void setup() {
+  // Initialize pin 22 as an output
+  pinMode(22, OUTPUT);
+}
+
+void loop() {
+  // Turn the magnet on by writing a HIGH signal to pin 22
+  digitalWrite(22, HIGH);
+  // Keep the magnet on for 2 seconds
+  delay(2000);
+
+  // Turn the magnet off by writing a LOW signal to pin 22
+  digitalWrite(22, LOW);
+  // Keep the magnet off for 2 seconds
+  delay(2000);
+}
