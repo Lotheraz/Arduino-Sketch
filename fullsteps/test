@@ -1,0 +1,26 @@
+// This function opens all valves simultaneously by setting all corresponding electromagnet pins to HIGH.
+void openAllValves() {
+  digitalWrite(electromagnetPin1, HIGH);
+  digitalWrite(electromagnetPin2, HIGH);
+  digitalWrite(electromagnetPin3, HIGH);
+  digitalWrite(electromagnetPin4, HIGH);
+  digitalWrite(electromagnetPin5, HIGH);
+  digitalWrite(electromagnetPin6, HIGH);
+  digitalWrite(electromagnetPin7, HIGH);
+  digitalWrite(electromagnetPin8, HIGH);
+  digitalWrite(electromagnetPin9, HIGH);
+}
+
+
+// This function closes all valves simultaneously by setting all corresponding electromagnet pins to LOW.
+void closeAllValves() {
+  digitalWrite(electromagnetPin1, LOW);
+  digitalWrite(electromagnetPin2, LOW);
+  digitalWrite(electromagnetPin3, LOW);
+  digitalWrite(electromagnetPin4, LOW);
+  digitalWrite(electromagnetPin5, LOW);
+  digitalWrite(electromagnetPin6, LOW);
+  digitalWrite(electromagnetPin7, LOW);
+  digitalWrite(electromagnetPin8, LOW);
+  digitalWrite(electromagnetPin9, LOW);
+}
