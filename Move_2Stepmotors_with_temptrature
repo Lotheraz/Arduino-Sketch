@@ -1,0 +1,150 @@
+// Define pins for electromagnets controlling the valves
+const int electromagnetPin1 = 22;  // Pin for electromagnet controlling valve 1
+const int electromagnetPin2 = 23;  // Pin for electromagnet controlling valve 2
+const int electromagnetPin3 = 24;  // Pin for electromagnet controlling valve 3
+const int electromagnetPin4 = 25;  // Pin for electromagnet controlling valve 4
+const int electromagnetPin5 = 26;  // Pin for electromagnet controlling valve 5
+const int electromagnetPin6 = 27;  // Pin for electromagnet controlling valve 6
+const int electromagnetPin7 = 28;  // Pin for electromagnet controlling valve 7 (Corrected comment from valve 8)
+const int electromagnetPin8 = 29;  // Pin for electromagnet controlling valve 8 (Corrected comment from valve 9)
+const int electromagnetPin9 = 30;  // Pin for electromagnet controlling valve 9 (Corrected comment from valve 10)
+const int sensorDigitalPin = 31;   // pin for sensor of pump (Corrected spelling)
+
+//Stepper Motor 1
+const int SM1_dirPin = 33;         // pin for direction of pump
+const int SM1_stepPin = 12;        // pin movement of pump
+const int SM1_enPin = 11;          // pin for high or low step motor
+
+//Stepper Motor 2
+const int SM2_dirPin = 10;
+const int SM2_stepPin = 9;
+const int SM2_enPin = 8;
+
+//Stepper Motor 3
+const int SM3_dirPin = 7;
+const int SM3_stepPin = 6;
+const int SM3_enPin = 5;
+
+//Stepper Motor 4
+const int SM4_dirPin = 4;
+const int SM4_stepPin = 3;
+const int SM4_enPin = 2;
+
+// Global variables for stepper motor 2 (Up and Down control)
+bool motorMoving2 = false; // Indicates whether stepper motor 2 is moving
+bool directionUp2 = true; // Direction control for stepper motor 2
+
+// Global variables for stepper motor 4 (Left and Right control)
+bool motorMoving4 = false; // Indicates whether stepper motor 4 is moving
+bool directionLeft4 = true; // Direction control for stepper motor 4
+
+const int lm35Pin = A0; // Angi analog pinne som sensoren er koblet til
+
+void setup() {
+  // Set electromagnet pins as output pins
+  pinMode(electromagnetPin1, OUTPUT);
+  pinMode(electromagnetPin2, OUTPUT);
+  pinMode(electromagnetPin3, OUTPUT);
+  pinMode(electromagnetPin4, OUTPUT);
+  pinMode(electromagnetPin5, OUTPUT);
+  pinMode(electromagnetPin6, OUTPUT);
+  pinMode(electromagnetPin7, OUTPUT);
+  pinMode(electromagnetPin8, OUTPUT);
+  pinMode(electromagnetPin9, OUTPUT);
+
+  Serial.begin(9600); // Initialize serial communication
+
+  //Step Motor1 output pins
+  pinMode(SM1_stepPin, OUTPUT);
+  pinMode(SM1_dirPin, OUTPUT);
+  pinMode(SM1_enPin, OUTPUT);
+  digitalWrite(SM1_enPin, LOW); // Enable the motor
+
+  //Step Motor2 output pins
+  pinMode(SM2_stepPin, OUTPUT);
+  pinMode(SM2_dirPin, OUTPUT);
+  pinMode(SM2_enPin, OUTPUT);
+  digitalWrite(SM2_enPin, LOW); // Enable the motor
+
+  //Step Motor3 output pins
+  pinMode(SM3_stepPin, OUTPUT);
+  pinMode(SM3_dirPin, OUTPUT);
+  pinMode(SM3_enPin, OUTPUT);
+  digitalWrite(SM3_enPin, LOW); // Enable the motor
+
+  //Step Motor4 output pins
+  pinMode(SM4_stepPin, OUTPUT);
+  pinMode(SM4_dirPin, OUTPUT);
+  pinMode(SM4_enPin, OUTPUT);
+  digitalWrite(SM4_enPin, LOW); // Enable the motor
+}
+
+
+
+
+void loop() {
+
+  int sensorValue = analogRead(lm35Pin);
+
+  // Konverter spenningsverdien til temperatur (mV per °C: 10mV per 1°C)
+  float milliVolts = (sensorValue / 1023.0) * 5000; // 5000 mV = 5V
+  float temperatureC = milliVolts / 10.0;
+
+  // Skriv ut temperaturen til seriellmonitor
+  
+  Serial.print(temperatureC);
+  Serial.println(" ");
+
+  delay(1000); // Vent litt tid før du leser temperaturen igjen
+  if (Serial.available() > 0) {
+    String receivedString = Serial.readStringUntil('\n');
+    
+    // Handle commands for stepper motor 2 (Up and Down)
+    if (receivedString == "MoveUp" || receivedString == "MoveDown") {
+      // Toggle the movement for motor 2 based on current state and direction
+      if (motorMoving2) {
+        motorMoving2 = false; // Stop if moving
+      } else {
+        motorMoving2 = true; // Start moving
+        directionUp2 = receivedString == "MoveUp"; // Determine direction
+      }
+    }
+
+    // Handle commands for stepper motor 4 (Left and Right)
+else if (receivedString == "MoveLeft" || receivedString == "MoveRight") {
+  // Toggle the movement for motor 4 based on current state and direction
+  if (motorMoving4) {
+    motorMoving4 = false; // Stop if moving
+  } else {
+    motorMoving4 = true; // Start moving
+    directionLeft4 = receivedString != "MoveLeft"; // Invert direction logic here
+   }
+  }
+ }
+
+  // Move stepper motor 2 if it's supposed to move
+  if (motorMoving2) {
+    continuousMoveMotor(SM2_dirPin, SM2_stepPin, directionUp2, motorMoving2);
+  }
+  
+  // Move stepper motor 4 if it's supposed to move
+  if (motorMoving4) {
+    continuousMoveMotor(SM4_dirPin, SM4_stepPin, !directionLeft4, motorMoving4); // Use !directionLeft4 for the correct logical direction
+  }
+}
+
+void continuousMoveMotor(int dirPin, int stepPin, bool direction, bool &motorMoving) {
+    digitalWrite(dirPin, direction ? HIGH : LOW); // Set direction based on boolean value
+    while (motorMoving && Serial.available() == 0) {
+        digitalWrite(stepPin, HIGH);
+        delayMicroseconds(1000); // Speed control
+        digitalWrite(stepPin, LOW);
+        delayMicroseconds(1000); // Speed control
+        // Optionally add code here to check for new Serial commands within the movement loop
+    }
+      // Les spenningsverdien fra sensoren
+
+}
+
+
+
