@@ -1,7 +1,6 @@
-//kode for suge som fungerte
-const int dirPin =33;
-const int stepPin = 12;
-const int enPin = 11;
+const int dirPin =7;
+const int stepPin =6;
+const int enPin = 5;
 
 
 void setup() {
@@ -15,7 +14,7 @@ void setup() {
 
 void loop() {
     
-  sugePumpe(33,12,11,6000);
+  sugePumpe(7,6,5,6000);
 }
 void sugePumpe(int dirPin, int stepPin, int endPin, unsigned long tid){
    // Aktiverer pumpen (sender kontinuerlige stegsignaler) i 60 sekunder
