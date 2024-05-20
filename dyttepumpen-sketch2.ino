@@ -1,4 +1,3 @@
-//kode for dytte som fungerte
 const int dirPin = 33;
 const int stepPin = 12;
 const int enPin = 11;
