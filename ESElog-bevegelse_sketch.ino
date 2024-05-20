@@ -1,58 +1,58 @@
-const int dirPin = 4;
-const int stepPin = 3;
-const int enPin = 2;
-const int sensorDigitalPin =32;
+const int dirPin = 4;          // Direction pin for the stepper motor
+const int stepPin = 3;         // Step pin for the stepper motor
+const int enPin = 2;           // Enable pin for the stepper motor
+const int sensorDigitalPin = 32; // Digital pin for the sensor
 
 void setup() {
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
     pinMode(enPin, OUTPUT);
     pinMode(sensorDigitalPin, INPUT);
-    digitalWrite(enPin, LOW); // Aktiverer motoren
+    digitalWrite(enPin, LOW); // Enable the motor
     Serial.begin(9600);
 }
 
 void loop() {
-    int sensorValue = digitalRead(sensorDigitalPin); // Les verdien fra sensoren
-    digitalWrite(dirPin, HIGH);
-    while (digitalRead(sensorDigitalPin) == LOW) {
-        digitalWrite(stepPin, HIGH);
+    int sensorValue = digitalRead(sensorDigitalPin); // Read the sensor value
+    digitalWrite(dirPin, HIGH); // Set direction to HIGH
+    while (digitalRead(sensorDigitalPin) == LOW) { // While sensor is not triggered
+        digitalWrite(stepPin, HIGH); // Step the motor
         delayMicroseconds(200);
         digitalWrite(stepPin, LOW);
         delayMicroseconds(200);
     }
     
-    // Hvis sensoren er utløst, stopp motoren og forbered deg på å bevege den nedover
+    // If the sensor is triggered, stop the motor and prepare to move it down
     if (sensorValue == HIGH) {
-        Serial.println("Grensen nådd, beveger seg ned");
-        moveMotor(false, 10300); // Bytt retning og beveg deg ned
-        delay(2000); // Vent 2 sekunder ved første stopp-posisjon
-        moveMotor(false, 1050); // Beveg deg nedover
-        delay(2000); // Vent 2 sekunder ved andre stopp-posisjon
-        moveMotor(false, 1050); // Beveg deg nedover
-        delay(2000); // Vent 2 sekunder ved tredje stopp-posisjon
-         moveMotor(false, 1050); // Beveg deg nedover
-        delay(2000); // Vent 2 sekunder ved fjerde stopp-posisjon
-         moveMotor(false, 1050); // Beveg deg nedover
-        delay(2000); // Vent 2 sekunder ved femte stopp-posisjon
-         moveMotor(false, 1050); // Beveg deg nedover
-        delay(2000); // Vent 2 sekunder ved sjette stopp-posisjon
-         moveMotor(false, 1050); // Beveg deg nedover
-        delay(2000); // Vent 2 sekunder ved sivene stopp-posisjon
-         moveMotor(false, 1050); // Beveg deg nedover
-        delay(2000); // Vent 2 sekunder ved åttende stopp-posisjon
-        // Fortsett med andre stopp-posisjoner etter behov
+        Serial.println("Limit reached, moving down");
+        moveMotor(false, 10300); // Reverse direction and move down
+        delay(2000); // Wait 2 seconds at the first stop position
+        moveMotor(false, 1050); // Move down
+        delay(2000); // Wait 2 seconds at the second stop position
+        moveMotor(false, 1050); // Move down
+        delay(2000); // Wait 2 seconds at the third stop position
+        moveMotor(false, 1050); // Move down
+        delay(2000); // Wait 2 seconds at the fourth stop position
+        moveMotor(false, 1050); // Move down
+        delay(2000); // Wait 2 seconds at the fifth stop position
+        moveMotor(false, 1050); // Move down
+        delay(2000); // Wait 2 seconds at the sixth stop position
+        moveMotor(false, 1050); // Move down
+        delay(2000); // Wait 2 seconds at the seventh stop position
+        moveMotor(false, 1050); // Move down
+        delay(2000); // Wait 2 seconds at the eighth stop position
+        // Continue with additional stop positions as needed
     } else {
-        moveMotor(true, 200); // Fortsett å bevege deg opp
+        moveMotor(true, 200); // Continue moving up
     }
     delay(200);
 }
 
 void moveMotor(bool directionUp, int steps) {
-    digitalWrite(enPin, LOW); // Aktiverer motoren
-    digitalWrite(dirPin, directionUp ? HIGH : LOW); // Setter retning
+    digitalWrite(enPin, LOW); // Enable the motor
+    digitalWrite(dirPin, directionUp ? HIGH : LOW); // Set direction
 
-    // Utfør steg
+    // Perform steps
     int x = 0;
     while (x < steps) {
         digitalWrite(stepPin, HIGH);
@@ -62,9 +62,6 @@ void moveMotor(bool directionUp, int steps) {
         x++;
     }
 
-    // Valgfritt kan du deaktivere motoren etter bevegelsen
+    // Optionally, you can disable the motor after the move
     // digitalWrite(enPin, HIGH);
 }
-
-
-
