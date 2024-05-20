@@ -1,7 +1,7 @@
-const int dirPin = 10;
-const int stepPin = 9;
-const int enPin = 8;
-const int sensorDigitalPin = 31;
+const int dirPin = 10;          // Direction pin for the stepper motor
+const int stepPin = 9;          // Step pin for the stepper motor
+const int enPin = 8;            // Enable pin for the stepper motor
+const int sensorDigitalPin = 31; // Digital pin for the sensor
 
 void setup() {
     pinMode(stepPin, OUTPUT);
@@ -14,16 +14,14 @@ void setup() {
 
 void loop() {
     int sensorValue = digitalRead(sensorDigitalPin); // Read the sensor value
-    digitalWrite(dirPin, HIGH);
-  while(digitalRead(sensorDigitalPin)==LOW){
-        
-        digitalWrite(stepPin, HIGH);
+    digitalWrite(dirPin, HIGH); // Set direction to HIGH
+    while (digitalRead(sensorDigitalPin) == LOW) { // While sensor is not triggered
+        digitalWrite(stepPin, HIGH); // Step the motor
         delayMicroseconds(500);
         digitalWrite(stepPin, LOW);
         delayMicroseconds(500);
-      
-
-  }
+    }
+    
     // If the sensor is triggered, stop the motor and prepare to move it down
     if (sensorValue == HIGH) {
         Serial.println("Limit reached, moving down");
@@ -36,7 +34,7 @@ void loop() {
 
 void moveMotor(bool directionUp, int steps) {
     digitalWrite(enPin, LOW); // Enable the motor
-    digitalWrite(dirPin, directionUp ? HIGH : LOW); // Set directionm
+    digitalWrite(dirPin, directionUp ? HIGH : LOW); // Set direction
 
     // Perform steps
     int x = 0;
