@@ -67,6 +67,4 @@ void moveMotor(bool directionUp, int steps) {
 }
 
 
-//I denne koden legger vi til flere `moveMotor`-kall etter det første `moveMotor(false, 8000);`-kallet.
-// Hver `moveMotor`-funksjon har en tilsvarende forsinkelse (i dette tilfellet 2 sekunder) før du beveger deg videre til neste
-//stopp-posisjon. vi kan justere forsinkelsen og antall steg for hver stopp-posisjon etter behov.
+
