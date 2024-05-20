@@ -1,8 +1,7 @@
-//tredje test
 #define HEATER_PIN 13     // Pin for spenningsforsyning til varmeelement
 #define TEMPERATURE_PIN A0 // Pin for temperatursensor
 
-double Setpoint = 38.0; // Ønsket temperatur i Celsius
+double Setpoint = 40; // Ønsket temperatur i Celsius
 double Hysteresis = 0.5; // Dødband rundt Setpoint
 int WindowSize = 5000;  // Vindustid for regulering (i millisekunder)
 int P_value = 50;       // Proporsjonal konstant
