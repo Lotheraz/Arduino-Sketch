@@ -1,6 +1,6 @@
-const int dirPin =9;
-const int stepPin =10;
-const int enPin = 11;
+const int dirPin =10;
+const int stepPin =9;
+const int enPin = 8;
 
 void setup()
 {
