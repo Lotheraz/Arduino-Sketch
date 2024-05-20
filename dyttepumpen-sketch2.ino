@@ -1,7 +1,7 @@
 //kode for dytte som fungerte
-const int dirPin = 7;
-const int stepPin = 6;
-const int enPin = 5;
+const int dirPin = 33;
+const int stepPin = 12;
+const int enPin = 11;
 
 void setup() {
   pinMode(stepPin, OUTPUT);
@@ -12,7 +12,7 @@ void setup() {
 }
 
 void loop() {
-  dyttePumpe(7,6,5, 1000);
+  dyttePumpe(33,12,11, 1000);
 }
 void dyttePumpe(int dirPin, int stepPin, int endPin, unsigned long tid){
   // Aktiverer pumpen (sender kontinuerlige stegsignaler) i 10 sekunder
