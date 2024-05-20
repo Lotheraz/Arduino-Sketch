@@ -1,6 +1,3 @@
-//For å legge til flere stopp-posisjoner etter `moveMotor(false, 16000);`-linjen, kan du bruke en tilsvarende tilnærming som for å bevege motoren. Her er hvordan du kan gjøre det:
-
-
 const int dirPin = 4;
 const int stepPin = 3;
 const int enPin = 2;
