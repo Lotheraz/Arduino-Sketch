@@ -1,0 +1,804 @@
+// Define pins for electromagnets controlling the valves
+const int electromagnetPin1 = 22;  // Pin for electromagnet controlling valve 1
+const int electromagnetPin2 = 23;  // Pin for electromagnet controlling valve 2
+const int electromagnetPin3 = 24;  // Pin for electromagnet controlling valve 3
+const int electromagnetPin4 = 25;  // Pin for electromagnet controlling valve 4
+const int electromagnetPin5 = 26;  // Pin for electromagnet controlling valve 5
+const int electromagnetPin6 = 27;  // Pin for electromagnet controlling valve 6
+const int electromagnetPin7 = 28;  // Pin for electromagnet controlling valve 7
+const int electromagnetPin8 = 29;  // Pin for electromagnet controlling valve 8
+const int electromagnetPin9 = 30;  // Pin for electromagnet controlling valve 9
+const int sensorDigitalPin1 = 31;  // Pin for sensor of up and down movement
+const int sensorDigitalPin2 = 32;  // Pin for sensor of left and right movement
+
+// Stepper Motor 1
+const int SM1_dirPin = 33;         // Pin for direction of pump
+const int SM1_stepPin = 12;        // Pin movement of pump
+const int SM1_enPin = 11;          // Pin for high or low step motor
+
+// Stepper Motor 2
+const int SM2_dirPin = 10;
+const int SM2_stepPin = 9;
+const int SM2_enPin = 8;
+
+// Stepper Motor 3
+const int SM3_dirPin = 7;
+const int SM3_stepPin = 6;
+const int SM3_enPin = 5;
+
+// Stepper Motor 4
+const int SM4_dirPin = 4;
+const int SM4_stepPin = 3;
+const int SM4_enPin = 2;
+
+bool motorMoving1 = false;
+bool pump1Pushing = true; // True for pushing, false for sucking
+
+// Global variables for stepper motor 2 (Up and Down control)
+bool motorMoving2 = false; // Indicates whether stepper motor 2 is moving
+bool directionUp2 = true; // Direction control for stepper motor 2
+
+// Global variables for stepper motor 3 (Pump 2 control)
+bool motorMoving3 = false;
+bool pump2Pushing = true; // True for pushing, false for sucking
+
+// Global variables for stepper motor 4 (Left and Right control)
+bool motorMoving4 = false; // Indicates whether stepper motor 4 is moving
+bool directionLeft4 = true; // Direction control for stepper motor 4
+
+bool abortFlag = false; // Flag to indicate if an abort operation is needed
+const int lm35Pin = A0; // Analog pin for the temperature sensor
+
+void setup() {
+  // Set electromagnet pins as output pins
+  pinMode(electromagnetPin1, OUTPUT);
+  pinMode(electromagnetPin2, OUTPUT);
+  pinMode(electromagnetPin3, OUTPUT);
+  pinMode(electromagnetPin4, OUTPUT);
+  pinMode(electromagnetPin5, OUTPUT);
+  pinMode(electromagnetPin6, OUTPUT);
+  pinMode(electromagnetPin7, OUTPUT);
+  pinMode(electromagnetPin8, OUTPUT);
+  pinMode(electromagnetPin9, OUTPUT);
+
+  Serial.begin(9600); // Initialize serial communication
+
+  // Step Motor 1 output pins
+  pinMode(SM1_stepPin, OUTPUT);
+  pinMode(SM1_dirPin, OUTPUT);
+  pinMode(SM1_enPin, OUTPUT);
+  digitalWrite(SM1_enPin, LOW); // Enable the motor
+
+  // Step Motor 2 output pins
+  pinMode(SM2_stepPin, OUTPUT);
+  pinMode(SM2_dirPin, OUTPUT);
+  pinMode(SM2_enPin, OUTPUT);
+  digitalWrite(SM2_enPin, LOW); // Enable the motor
+
+  // Step Motor 3 output pins
+  pinMode(SM3_stepPin, OUTPUT);
+  pinMode(SM3_dirPin, OUTPUT);
+  pinMode(SM3_enPin, OUTPUT);
+  digitalWrite(SM3_enPin, LOW); // Enable the motor
+
+  // Step Motor 4 output pins
+  pinMode(SM4_stepPin, OUTPUT);
+  pinMode(SM4_dirPin, OUTPUT);
+  pinMode(SM4_enPin, OUTPUT);
+  digitalWrite(SM4_enPin, LOW); // Enable the motor
+}
+
+void loop() {
+  int sensorValue = analogRead(lm35Pin);
+  float milliVolts = (sensorValue / 1023.0) * 5000; // Convert to millivolts
+  float temperatureC = milliVolts / 10.0;
+  Serial.print("Temperature:");
+  Serial.print(temperatureC);
+  Serial.println("");
+  
+  if (Serial.available() > 0) {
+    String receivedString = Serial.readStringUntil('\n');
+    receivedString.trim(); // Remove any whitespace or newline characters
+
+    if (receivedString == "Abort") {
+      abortOperations();
+    } else if (receivedString == "stop") {
+      motorMoving1 = false;
+      motorMoving2 = false;
+      motorMoving3 = false;
+      motorMoving4 = false;
+      Serial.println("All motors stopped.");
+    } else {
+      // Check if the received string can be converted to an integer (i.e., check if it's a step command)
+      int selectedStep = receivedString.toInt(); // Try to convert to integer
+      if (selectedStep > 0 && receivedString.length() == String(selectedStep).length()) {
+        // It's a valid step command
+        executeStep(selectedStep);
+      } else {
+        // It's a regular command
+        static String lastCommand = ""; // Store the last command received
+        if (receivedString != lastCommand) {
+          lastCommand = receivedString; // Update last command
+
+          if (receivedString == "Open_All_Valves") {
+            openAllValves();
+            delay(100000);
+          } else if (receivedString == "Close_All_Valves") {
+            closeAllValves();
+          } else if (receivedString.startsWith("Mag") && receivedString.length() > 5) {
+            int valveNumber = receivedString.substring(3, 4).toInt(); // Extract the valve number
+            if (receivedString.endsWith("_ON")) {
+              openValve(valveNumber);
+            } else if (receivedString.endsWith("_OFF")) {
+              closeValve(valveNumber);
+            }
+          } else if (receivedString == "Pump1_On_Push" || receivedString == "Pump1_On_Suck") {
+            motorMoving1 = !motorMoving1;
+            pump1Pushing = receivedString == "Pump1_On_Push";
+          } else if (receivedString == "Pump2_On_Push" || receivedString == "Pump2_On_Suck") {
+            motorMoving3 = !motorMoving3;
+            pump2Pushing = receivedString == "Pump2_On_Push";
+          } else if (receivedString == "MoveUp" || receivedString == "MoveDown") {
+            motorMoving2 = !motorMoving2;
+            directionUp2 = receivedString == "MoveUp";
+          } else if (receivedString == "MoveLeft" || receivedString == "MoveRight") {
+            motorMoving4 = !motorMoving4;
+            directionLeft4 = receivedString == "MoveLeft";
+          } else if (receivedString == "Reset_Motor1") {
+            resetMotor1();
+          } else if (receivedString == "Reset_Motor2") {
+            resetMotor2();
+          } else if (receivedString == "Reset_Pumps") {
+            resetPumps();
+          }
+        }
+      }
+    }
+  }
+
+  // Update stepper motors status
+  if (motorMoving1) {
+    continuousMoveMotor(SM1_dirPin, SM1_stepPin, pump1Pushing, motorMoving1, -1); // -1 means no sensor check
+  }
+  if (motorMoving3) {
+    continuousMoveMotor(SM3_dirPin, SM3_stepPin, pump2Pushing, motorMoving3, -1); // -1 means no sensor check
+  }
+  if (motorMoving2) {
+    continuousMoveMotor(SM2_dirPin, SM2_stepPin, directionUp2, motorMoving2, sensorDigitalPin1);
+  }
+  if (motorMoving4) {
+    continuousMoveMotor(SM4_dirPin, SM4_stepPin, directionLeft4, motorMoving4, sensorDigitalPin2);
+  }
+}
+
+void continuousMoveMotor(int dirPin, int stepPin, bool direction, bool &motorMoving, int sensorPin) {
+  digitalWrite(dirPin, direction ? HIGH : LOW); // Set direction based on boolean value
+  while (motorMoving && Serial.available() == 0) {
+    if (abortFlag) return; // Check abort flag
+
+    // Check the sensor and ensure it can only move in the allowed direction
+    if (sensorPin != -1 && digitalRead(sensorPin) == HIGH) {
+      if ((dirPin == SM2_dirPin && direction) || (dirPin == SM4_dirPin && direction)) {
+        motorMoving = false; // Stop if trying to move in a disallowed direction
+        Serial.println("Movement stopped due to sensor trigger.");
+        return;
+      }
+    }
+
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(200); // Reduce delay to speed up the motor
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(200); // Reduce delay to speed up the motor
+  }
+}
+
+void resetPumps() {
+    // Move both pumps to the top
+    resetPump(SM1_dirPin, SM1_stepPin, SM1_enPin, 325, true);
+    resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 325, true);
+
+    // Move both pumps halfway down
+    resetPump(SM1_dirPin, SM1_stepPin, SM1_enPin, 650, false);
+    resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, false);
+}
+
+void resetPump(int dirPin, int stepPin, int enPin, int delayTime, bool directionUp) {
+    digitalWrite(enPin, LOW); // Enable the motor
+    digitalWrite(dirPin, directionUp ? HIGH : LOW); // Set direction
+
+    unsigned long startMillis = millis();
+    unsigned long stepCount = 0;
+    unsigned long maxSteps = 4000; // Adjust this value as needed
+
+    while ((millis() - startMillis < 2000) && (stepCount < maxSteps)) { // Run for 2 seconds or max steps
+        if (abortFlag) return; // Check abort flag
+        digitalWrite(stepPin, HIGH);
+        delayMicroseconds(delayTime);
+        digitalWrite(stepPin, LOW);
+        delayMicroseconds(delayTime);
+        stepCount++;
+    }
+
+    // Optionally, you can disable the motor after the move
+    // digitalWrite(enPin, HIGH);
+}
+
+void openAllValves() { // Open all valves
+  digitalWrite(electromagnetPin1, HIGH);
+  digitalWrite(electromagnetPin2, HIGH);
+  digitalWrite(electromagnetPin3, HIGH);
+  digitalWrite(electromagnetPin4, HIGH);
+  digitalWrite(electromagnetPin5, HIGH);
+  digitalWrite(electromagnetPin6, HIGH);
+  digitalWrite(electromagnetPin7, HIGH);
+  digitalWrite(electromagnetPin8, HIGH);
+  digitalWrite(electromagnetPin9, HIGH);
+  delay(10000);
+}
+
+void closeAllValves() { // Close all valves
+  digitalWrite(electromagnetPin1, LOW);
+  digitalWrite(electromagnetPin2, LOW);
+  digitalWrite(electromagnetPin3, LOW);
+  digitalWrite(electromagnetPin4, LOW);
+  digitalWrite(electromagnetPin5, LOW);
+  digitalWrite(electromagnetPin6, LOW);
+  digitalWrite(electromagnetPin7, LOW);
+  digitalWrite(electromagnetPin8, LOW);
+  digitalWrite(electromagnetPin9, LOW);
+}
+
+// Function to open a specific valve
+void openValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), HIGH); // Turn on electromagnet to open the valve
+}
+
+// Function to close a specific valve
+void closeValve(int valveNumber) {
+  digitalWrite(getElectromagnetPin(valveNumber), LOW); // Turn off electromagnet to close the valve
+}
+
+// Function to get the pin number of a specific electromagnet based on valve number
+int getElectromagnetPin(int valveNumber) {
+  switch (valveNumber) {
+    case 1: return electromagnetPin1;
+    case 2: return electromagnetPin2;
+    case 3: return electromagnetPin3;
+    case 4: return electromagnetPin4;
+    case 5: return electromagnetPin5;
+    case 6: return electromagnetPin6;
+    case 7: return electromagnetPin7;
+    case 8: return electromagnetPin8;
+    case 9: return electromagnetPin9;
+    default: return -1; // Invalid valve number
+  }
+}
+
+// Function to notify GUI about the step being executed
+void notifyStepStart(int stepNumber) {
+    Serial.print("Running Step ");
+    Serial.println(stepNumber);
+}
+
+// Function to execute specific steps
+void executeStep(int stepNumber) {
+    if (abortFlag) return; // Check abort flag at the beginning
+    notifyStepStart(stepNumber); // Notify the GUI about the step start
+    switch (stepNumber) {
+        case 1:
+            notifyStepStart(2);
+            step2();
+            if (abortFlag) return;
+            notifyStepStart(3);
+            step3();
+            if (abortFlag) return;
+            notifyStepStart(4);
+            step4();
+            if (abortFlag) return;
+            notifyStepStart(5);
+            step5();
+            if (abortFlag) return;
+            notifyStepStart(6);
+            step6();
+            if (abortFlag) return;
+            notifyStepStart(7);
+            step7();
+            if (abortFlag) return;
+            notifyStepStart(8);
+            step8();
+            if (abortFlag) return;
+            notifyStepStart(9);
+            step9();
+            if (abortFlag) return;
+            notifyStepStart(10);
+            step10();
+            if (abortFlag) return;
+            notifyStepStart(11);
+            step11();
+            if (abortFlag) return;
+            notifyStepStart(12);
+            step12();
+            if (abortFlag) return;
+            notifyStepStart(13);
+            step13();
+            if (abortFlag) return;
+            notifyStepStart(14);
+            step14();
+            if (abortFlag) return;
+            notifyStepStart(15);
+            step15();
+            if (abortFlag) return;
+            notifyStepStart(16);
+            step16();
+            if (abortFlag) return;
+            notifyStepStart(17);
+            step17();
+            if (abortFlag) return;
+            notifyStepStart(18);
+            step18();
+            if (abortFlag) return;
+            notifyStepStart(19);
+            step19();
+            if (abortFlag) return;
+            notifyStepStart(20);
+            step20();
+            if (abortFlag) return;
+            notifyStepStart(21);
+            step21();
+            if (abortFlag) return;
+            notifyStepStart(22);
+            step22();
+            break;
+        case 2:
+            notifyStepStart(stepNumber);
+            step2();
+            break;
+        case 3:
+            notifyStepStart(stepNumber);
+            step3();
+            break;
+        case 4:
+            notifyStepStart(stepNumber);
+            step4();
+            break;
+        case 5:
+            notifyStepStart(stepNumber);
+            step5();
+            break;
+        case 6:
+            notifyStepStart(stepNumber);
+            step6();
+            break;
+        case 7:
+            notifyStepStart(stepNumber);
+            step7();
+            break;
+        case 8:
+            notifyStepStart(stepNumber);
+            step8();
+            break;
+        case 9:
+            notifyStepStart(stepNumber);
+            step9();
+            break;
+        case 10:
+            notifyStepStart(stepNumber);
+            step10();
+            break;
+        case 11:
+            notifyStepStart(stepNumber);
+            step11();
+            break;
+        case 12:
+            notifyStepStart(stepNumber);
+            step12();
+            break;
+        case 13:
+            notifyStepStart(stepNumber);
+            step13();
+            break;
+        case 14:
+            notifyStepStart(stepNumber);
+            step14();
+            break;
+        case 15:
+            notifyStepStart(stepNumber);
+            step15();
+            break;
+        case 16:
+            notifyStepStart(stepNumber);
+            step16();
+            break;
+        case 17:
+            notifyStepStart(stepNumber);
+            step17();
+            break;
+        case 18:
+            notifyStepStart(stepNumber);
+            step18();
+            break;
+        case 19:
+            notifyStepStart(stepNumber);
+            step19();
+            break;
+        case 20:
+            notifyStepStart(stepNumber);
+            step20();
+            break;
+        case 21:
+            notifyStepStart(stepNumber);
+            step21();
+            break;
+        case 22:
+            notifyStepStart(stepNumber);
+            step22();
+            break;
+    }
+}
+// Define functions for each step
+void step2() {
+  if (abortFlag) return; // Check abort flag
+  resetPumps();
+  resetMotor1();
+  resetMotor2();
+  closeAllValves(); // Close all valves
+  
+
+  openValve(4); // Open valve 4
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, false);
+  // delay(60000); // Wait for 60 seconds - Actual time for machine
+  delay(10000); // Wait for 10 seconds - Expo or test time
+  closeValve(4); // Close valve 4
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step3() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  delay(20000); // Wait for 20 seconds
+  // In this step 3 also turn off both pumps
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step4() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(5); // Open valve 5
+  openValve(6); // Open valve 6
+  delay(10000); // Wait for 10 seconds
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, true);
+  closeValve(6); // Close valve 6
+  closeValve(5);
+  // Step 4: pump1 is off, pump2 is ON push
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step5() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(1); // Open valve 1
+  delay(10000); // Wait for 10 seconds
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, false);
+  closeValve(1); // Close valve 1
+  // In this step pump1 is off and pump2 is on suck
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step6() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  delay(120000); // Wait for 120 seconds
+  // Step 6: turn off both pumps
+  // performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step7() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(5); // Open valve 5
+  openValve(6); // Open valve 6
+  delay(5000); // Wait for 5 seconds
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, true);
+  closeValve(5); // Close valve 5
+  closeValve(6); // Close valve 6
+  // Step 7: pump 1 is off and turn on push
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step8() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(2); // Open valve 2
+  delay(10000); // Wait for 10 seconds
+  closeValve(2); // Close valve 2
+  // In this step8: pump 1 is off and pump2 on-suck
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, false);
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step9() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  delay(60000); // Wait for 60 seconds
+  // Step 9: turn off both pumps
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step10() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(5); // Open valve 5
+  openValve(6); // Open valve 6
+  delay(5000); // Wait for 5 seconds
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, true);
+  closeValve(5); // Close valve 5
+  closeValve(6); // Close valve 6
+  // Step 10: pump 1 is off and turn on push
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step11() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(3); // Open valve 3
+  delay(10000); // Wait for 10 seconds
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, false);
+  closeValve(3); // Close valve 3
+  // In this step11: pump 1 is off and pump2 on-suck
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step12() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  delay(20000); // Wait for 20 seconds
+  // Step 12: turn off both pumps
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step13() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(5); // Open valve 5
+  openValve(6); // Open valve 6
+  delay(5000); // Wait for 5 seconds
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, true);
+  closeValve(5); // Close valve 5
+  closeValve(6); // Close valve 6
+  // Step 13: pump 1 is off and turn on push
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step14() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  delay(5000); // Wait for 5 seconds
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, false);
+  // In this step14: pump 1 is off and pump2 on-suck
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step15() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(9); // Open valve 9
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, false);
+  delay(10000); // Wait for 10 seconds
+  closeValve(9); // Close valve 9
+  // In this step15: pump 1 is off and pump2 on-suck
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step16() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(5); // Open valve 5
+  openValve(9); // Open valve 9
+  delay(15000); // Wait for 15 seconds
+  resetPump(SM1_dirPin, SM1_stepPin, SM1_enPin, 650, false);
+  closeValve(5); // Close valve 5
+  closeValve(9); // Close valve 9
+  // Step 16: pump 1 is on-suck and turn off pump2
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step17() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  delay(5000); // Wait for 5 seconds
+  // In this step 17: turn off both pumps
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step18() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(8); // Open valve 8
+  delay(1000); // Wait for 1 seconds
+  resetPump(SM1_dirPin, SM1_stepPin, SM1_enPin, 650, false);
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, true);
+  closeValve(8); // Close valve 8
+  // Step 18: pump 1 is on-suck and pump2 is on push
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step19() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(8); // Open valve 8
+  resetPump(SM1_dirPin, SM1_stepPin, SM1_enPin, 650, true);
+  delay(20000); // Wait for 20 seconds
+  closeValve(8); // Close valve 8
+  // In this step 19: pump 1 on push and pump2 off
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step20() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  delay(100000); // Wait for 100 seconds
+  // Step 20: both pumps turn off
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step21() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  openValve(8); // Open valve 8
+  delay(1000); // Wait for seconds ** time is not mention in sheet
+  resetPump(SM1_dirPin, SM1_stepPin, SM1_enPin, 650, false);
+  resetPump(SM3_dirPin, SM3_stepPin, SM3_enPin, 650, true);
+  delay(10000);
+
+  closeValve(8); //closeValve Close valve 8
+  // Step 21: pump1 is on suck and pump2 is on push
+  performEndStepActions(SM2_dirPin, SM2_stepPin, SM2_enPin, 200); // Perform end step actions
+}
+
+void step22() {
+  if (abortFlag) return; // Check abort flag
+  closeAllValves(); // Close all valves
+  // For time delay--repeat this step for 30 to 120 minutes
+  // Step 22: turn off both pumps
+  resetMotor1();
+  resetMotor2();
+}
+
+// Function to reset Motor1
+void resetMotor1() {
+    // Debugging: Print initial sensor value
+    int initialSensorValue = digitalRead(sensorDigitalPin1);
+    Serial.print("Initial sensor value: ");
+    Serial.println(initialSensorValue);
+
+    // Move up until the sensor is triggered
+    digitalWrite(SM2_dirPin, HIGH); // Set direction up
+
+    // Move up until sensor is triggered
+    while (digitalRead(sensorDigitalPin1) == LOW && !abortFlag) {
+        digitalWrite(SM2_stepPin, HIGH);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+        digitalWrite(SM2_stepPin, LOW);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+    }
+
+    if (abortFlag) {
+      Serial.println("Reset Motor 1 aborted.");
+      return;
+    }
+
+    Serial.println("Limit reached, moving down");
+
+    // Move down a certain number of steps after the sensor is triggered
+    moveMotor1(false, 16400); // Reverse direction and move down
+}
+
+void moveMotor1(bool directionUp, int steps) {
+    digitalWrite(SM2_enPin, LOW); // Enable the motor
+    digitalWrite(SM2_dirPin, directionUp ? HIGH : LOW); // Set direction
+
+    // Perform steps
+    for (int x = 0; x < steps; x++) {
+        if (abortFlag) {
+            Serial.println("Move Motor 1 aborted.");
+            return;
+        }
+        digitalWrite(SM2_stepPin, HIGH);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+        digitalWrite(SM2_stepPin, LOW);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+    }
+
+    // Optionally, you can disable the motor after the move
+    // digitalWrite(SM2_enPin, HIGH);
+}
+
+// Function to reset Motor2
+void resetMotor2() {
+    // Debugging: Print initial sensor value
+    int initialSensorValue = digitalRead(sensorDigitalPin2);
+    Serial.print("Initial sensor value: ");
+    Serial.println(initialSensorValue);
+
+    // Move up until the sensor is triggered
+    digitalWrite(SM4_dirPin, HIGH); // Set direction up
+
+    // Move right until sensor is triggered
+    while (digitalRead(sensorDigitalPin2) == LOW && !abortFlag) {
+        digitalWrite(SM4_stepPin, LOW);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+        digitalWrite(SM4_stepPin, HIGH);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+    }
+
+    if (abortFlag) {
+      Serial.println("Reset Motor 2 aborted.");
+      return;
+    }
+
+    Serial.println("Limit reached, moving down");
+
+    moveMotor2(false, 10500); // Reverse direction and move down
+}
+
+void moveMotor2(bool directionUp, int steps) {
+    digitalWrite(SM4_enPin, LOW); // Enable the motor
+    digitalWrite(SM4_dirPin, directionUp ? HIGH : LOW); // Set direction
+
+    // Perform steps
+    for (int x = 0; x < steps; x++) {
+        if (abortFlag) {
+            Serial.println("Move Motor 1 aborted.");
+            return;
+        }
+        digitalWrite(SM4_stepPin, HIGH);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+        digitalWrite(SM4_stepPin, LOW);
+        delayMicroseconds(200); // Reduce delay to speed up the motor
+    }
+
+    // Optionally, you can disable the motor after the move
+    // digitalWrite(SM2_enPin, HIGH);
+}
+
+void performEndStepActions(int dirPin, int stepPin, int enPin, int delayTime) {
+    // Move the motor up for 1.5 seconds
+    moveMotorForTime(dirPin, stepPin, enPin, delayTime, true, 1500);
+    
+    // Wait for 2 seconds
+    delay(2000);
+
+    // Close all valves
+    closeAllValves();
+    resetPumps();
+    delay(1000);
+
+    // Move the motor back down for 1.5 seconds
+    moveMotorForTime(dirPin, stepPin, enPin, delayTime, false, 1500);
+}
+
+void moveMotorForTime(int dirPin, int stepPin, int enPin, int delayTime, bool directionUp, int duration) { // Arguments to be used in the fucntion
+    digitalWrite(enPin, LOW); // Enable the motor
+    digitalWrite(dirPin, directionUp ? HIGH : LOW); // Set direction
+
+    unsigned long startMillis = millis();
+    while (millis() - startMillis < duration) {
+        if (abortFlag) return; // Check abort flag
+        digitalWrite(stepPin, HIGH);
+        delayMicroseconds(delayTime);
+        digitalWrite(stepPin, LOW);
+        delayMicroseconds(delayTime);
+    }
+    
+    // Optionally, you can disable the motor after the move
+    // digitalWrite(enPin, HIGH);
+}
+
+void abortOperations() {
+    abortFlag = true;
+    motorMoving1 = false;
+    motorMoving2 = false;
+    motorMoving3 = false;
+    motorMoving4 = false;
+    Serial.println("Abort operation initiated.");
+}
